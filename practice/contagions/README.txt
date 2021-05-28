@@ -1,0 +1,2 @@
+基于HyperGraph上的SI SIS SIR 模型已完成
+本周开始将系统地阅读一下 Spreading on HyperGraphs 并寻找一些指标进行测验
