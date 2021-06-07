@@ -9,7 +9,7 @@ def loadData():
     用于处理数据集
     :return:data
     """
-    data_SYTH = pd.read_csv('./dataset/sythetic.txt', sep=' ', index_col=False, header=None)
+    data_SYTH = pd.read_csv('dataset/sythetic.txt', sep=' ', index_col=False, header=None)
     data = pd.DataFrame(data_SYTH)
     return data
 
@@ -21,11 +21,11 @@ def loadData2(data):
     """
     global dataset
     if data == 'NetHEPT':
-        data_NetHEPT = pd.read_csv('./dataset/hep.txt', sep=' ', index_col=False, header=None)
+        data_NetHEPT = pd.read_csv('dataset/hep.txt', sep=' ', index_col=False, header=None)
         data_NetHEPT_df = pd.DataFrame(data_NetHEPT)
         dataset = data_NetHEPT_df
     elif data == 'NetPHY':
-        data_NetPHY = pd.read_csv('./dataset/phy.txt', sep=' ', index_col=False, header=None)
+        data_NetPHY = pd.read_csv('dataset/phy.txt', sep=' ', index_col=False, header=None)
         data_NetPHY_df = pd.DataFrame(data_NetPHY)
         dataset = data_NetPHY_df
     return dataset

@@ -11,11 +11,11 @@ def loadData(data):
     """
     global dataset
     if data == 'NetHEPT':
-        data_NetHEPT = pd.read_csv('./dataset/hep.txt', sep=' ', index_col=False, header=None)
+        data_NetHEPT = pd.read_csv('dataset/hep.txt', sep=' ', index_col=False, header=None)
         data_NetHEPT_df = pd.DataFrame(data_NetHEPT)
         dataset = data_NetHEPT_df
     elif data == 'NetPHY':
-        data_NetPHY = pd.read_csv('./dataset/phy.txt', sep=' ', index_col=False, header=None)
+        data_NetPHY = pd.read_csv('dataset/phy.txt', sep=' ', index_col=False, header=None)
         data_NetPHY_df = pd.DataFrame(data_NetPHY)
         dataset = data_NetPHY_df
     return dataset
