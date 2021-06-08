@@ -2,15 +2,15 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import random
-import copy
 import matplotlib.pyplot as plt
+import copy
 
 def loadData():
     """
     用于处理数据集
     :return:data
     """
-    data_SYTH = pd.read_csv('./dataset/sythetic.txt', sep=' ', index_col=False, header=None)
+    data_SYTH = pd.read_csv('dataset/sythetic.txt', sep=' ', index_col=False, header=None)
     data = pd.DataFrame(data_SYTH)
     return data
 
@@ -59,6 +59,31 @@ def initGraph2(data_NetHEPT_df,nodes_num):
         DG.add_weighted_edges_from([(int(row[0]-1), int(row[1]-1), 0.01)])
     return DG
 
+def getDegreeList(G,key_nodes_total):
+    print(G.degree())
+    degree_list = []
+    for (i, j) in G.degree():
+        degree_list.append(j)
+    ser1 = pd.Series(degree_list).rank(method='first', ascending=False)
+    degree_max_list = ser1[ser1.values <= key_nodes_total].index
+    return degree_max_list
+
+# draw the contagion network
+# 可视化传播图
+# @param G:  网络
+# @param N:  最终总共有多少个节点
+# @param s_list:    易感节点列表
+# @param i_list:    感染节点列表
+def drawGraph(G,N,s_list,i_list):
+
+    options = {"node_size": 50, "alpha": 1}
+    pos = nx.spring_layout(G)  # positions for all nodes
+    nx.draw_networkx_nodes(G, pos, nodelist=s_list, node_color="b", **options)
+    nx.draw_networkx_nodes(G, pos, nodelist=i_list, node_color="r", **options)
+    nx.draw_networkx_edges(G, pos, alpha=1, width=1)
+    plt.axis("off")
+    plt.show()
+
 def IC_Contagions(DG,seed_list,N,tmax):
     """
     独立级联 传播方式 实现算法
@@ -98,70 +123,25 @@ def IC_Contagions(DG,seed_list,N,tmax):
 
     return (t_total_list, i_total_list, s_total_list)
 
-def degreeDiscountIC(DG, k):
-    """
-    该方法为 基于IC传播 的 Degree Discount算法
-    :param DG: 待传播有向网络
-    :param k: 需要寻找的种子节点的个数
-    :return: key_list
-    """
-    key_list = []
-    d_list = []
-    dd_list = []
-    t_list = []
-    for each in DG.nodes:
-        d_list.append(DG.degree(each))
-        dd_list.append(DG.degree(each))
-        t_list.append(0)
-    for i in range(0, k):
-        remain_nodes = []
-        dd_list_new = copy.deepcopy(dd_list)
-        for inode in DG.nodes:
-            if inode not in key_list:
-                remain_nodes.append(inode)
-            else:
-                dd_list_new[inode] = 0
-        u = dd_list_new.index(max(dd_list_new))
-        key_list.append(u)
-        remain_nodes.remove(u)
-        for adj in list(DG.neighbors(u)):
-            if adj in remain_nodes:
-                t_list[adj] = t_list[adj] + 1
-                val = DG.get_edge_data(u, adj)['weight']
-                dd_list[adj] = d_list[adj] - (2 * t_list[adj]) - ((d_list[adj] - t_list[adj]) * t_list[adj] * val)
-    print('t_list', t_list)
-    print('d_list', d_list)
-    print('dd_list', dd_list)
-    return key_list
+
 
 if __name__ == '__main__':
+
     # test the NetHEPT dataset
     N = 15223
     tmax = 10
     data_NetHEPT_df = loadData2('NetHEPT')
     DG = initGraph2(data_NetHEPT_df, N)
-    # seed_list = random.sample(list(np.arange(N)), 500)
-
-
-    # N = 9
-    # tmax = 5
-    # data_SYTH_df = loadData()
-    # DG = initGraph(data_SYTH_df, N)
-    # key_nodes_total = 3
-
-    # print('------------------------------------------')
-    # print('经 Degree Discount 算法，您需寻找的' + str(key_nodes_total) + '个种子节点如下')
-    # print(seed_list)
     seed_size = 50
     seed_size_list = np.arange(seed_size)
     inf_spread_matrix = []
-    # R = 100
-    R = 500
+
+    R = 200
     for r in range(0, R):
         inf_spread_list = []
-        for i in range(1, seed_size+1):
+        for i in range(1, seed_size + 1):
             DG = copy.deepcopy(DG)
-            seed_list = degreeDiscountIC(DG, i)
+            seed_list = getDegreeList(DG, i)
             print('-------------------- ROUND ' + str(r) + ' ----------------------')
             print('经 Degree Discount 算法，您需寻找的' + str(i) + '个种子节点如下')
             print(seed_list)
@@ -174,7 +154,6 @@ if __name__ == '__main__':
     y = mean_arr
     plt.ylabel('Influence spread')
     plt.xlabel('seed set size')
-    plt.plot(x, y, marker='s', markersize=4., label='DegreeDiscountIC')
+    plt.plot(x, y, marker='s', markersize=4., label='Degree', color='coral')
     plt.legend()
     plt.show()
-
