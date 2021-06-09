@@ -59,14 +59,10 @@ def initGraph2(data_NetHEPT_df,nodes_num):
         DG.add_weighted_edges_from([(int(row[0]-1), int(row[1]-1), 0.01)])
     return DG
 
-def getDegreeList(G,key_nodes_total):
+def getSeedList(G,key_nodes_total):
     print(G.degree())
-    degree_list = []
-    for (i, j) in G.degree():
-        degree_list.append(j)
-    ser1 = pd.Series(degree_list).rank(method='first', ascending=False)
-    degree_max_list = ser1[ser1.values <= key_nodes_total].index
-    return degree_max_list
+    degree_list = random.sample(list(np.array(G.nodes)), key_nodes_total)
+    return degree_list
 
 # draw the contagion network
 # 可视化传播图
@@ -141,9 +137,9 @@ if __name__ == '__main__':
         inf_spread_list = []
         for i in range(1, seed_size + 1):
             DG = copy.deepcopy(DG)
-            seed_list = getDegreeList(DG, i)
+            seed_list = getSeedList(DG, i)
             print('-------------------- ROUND ' + str(r) + ' ----------------------')
-            print('经 Degree 算法，您需寻找的' + str(i) + '个种子节点如下')
+            print('经 Random 算法，您需寻找的' + str(i) + '个种子节点如下')
             print(seed_list)
             t_total_list, i_total_list, s_total_list = IC_Contagions(DG, seed_list, N, tmax)
             inf_spread_list.append(i_total_list[-1])
@@ -155,6 +151,6 @@ if __name__ == '__main__':
     plt.ylabel('Influence spread')
     plt.xlabel('seed set size')
     plt.ylim(-6, 163)
-    plt.plot(x, y, marker='s', markersize=4., label='Degree', color='coral')
+    plt.plot(x, y, markersize=4., label='Random', color='r')
     plt.legend()
     plt.show()
