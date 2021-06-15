@@ -107,12 +107,14 @@ def IC_Contagions(DG,seed_list,N,tmax):
     t = 1
 
     while t < tmax:
+        new_infected = []
         for each in i_list:
             for adj in list(DG.neighbors(each)):
                 if adj in s_list:
                     if random.random() < DG.get_edge_data(each, adj)['weight']:
                         s_list.remove(adj)
-                        i_list.append(adj)
+                        new_infected.append(adj)
+        i_list.extend(new_infected)
         i_num = len(i_list)
         s_num = len(s_list)
         i_total_list.append(i_num)

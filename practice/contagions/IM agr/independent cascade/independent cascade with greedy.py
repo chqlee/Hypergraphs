@@ -115,12 +115,14 @@ def IC_Greedy(DG, key_nodes_total, N, tmax, R):
                         i_list.append(each)
                 t = 1
                 while t < tmax:
+                    new_infected = []
                     for each in i_list:
                         for adj in list(DG.neighbors(each)):
                             if adj in s_list:
                                 if random.random() < DG.get_edge_data(each, adj)['weight']:
                                     s_list.remove(adj)
-                                    i_list.append(adj)
+                                    new_infected.append(adj)
+                    i_list.extend(new_infected)
                     t = t + 1
                 # 每次结束后i的总数
                 i_num = len(i_list)
