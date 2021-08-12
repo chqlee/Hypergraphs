@@ -21,7 +21,7 @@ def constructMatrix():
             matrix[i, j] = 1
     return matrix
 
-def findAdjNode(I_list, df_hyper_matrix):
+def findAdjNode(inode, df_hyper_matrix):
     """
     找到邻居节点集合
     :param I_list: 感染节点集
@@ -29,16 +29,13 @@ def findAdjNode(I_list, df_hyper_matrix):
     :return: 不重复的邻居节点集 np.unique(nodes_in_edges)
     """
     # 找到该点所属的超边集合
-    edges_conclude_nodes = np.array([])
-    for node in I_list:
-        edges_conclude_nodes = np.where(np.array(df_hyper_matrix.loc[node]) == 1)[0]
+    edges_conclude_nodes = np.where(np.array(df_hyper_matrix.loc[inode]) == 1)[0]
     # 找到可能传播到超边中的顶点集合
     edge = random.sample(list(edges_conclude_nodes), 1)[0]
     nodes = np.where(np.array(df_hyper_matrix[edge]) == 1)[0]
-    # print(nodes)
     return nodes
 
-def formatInfectedList(I_list, infected_list):
+def formatInfectedList(I_list, infected_list, infected_T):
     """
     筛选出不在I_list当中的节点
     :param I_list: 感染节点集
@@ -47,7 +44,7 @@ def formatInfectedList(I_list, infected_list):
     """
     format_list = []
     for i in range(0, len(infected_list)):
-        if infected_list[i] not in I_list:
+        if infected_list[i] not in I_list and infected_list[i] not in infected_T:
             format_list.append(infected_list[i])
     return format_list
 
@@ -62,25 +59,27 @@ if __name__ == '__main__':
     N = len(df_hyper_matrix.index.values)
     total_matrix = []
     for i_node in range(0, N):
-        print("---------computing----------")
-        # i_node = random.randint(0, N-1)
+        print("▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋▋")
         I_list = [i_node]
 
         # 开始传播
-        beta = 0.5
+        beta = 0.02
         iters = 25
         I_total_list = [1]
 
         for t in range(0, iters):
-            # 找到邻居节点集
-            adj_nodes = findAdjNode(I_list, df_hyper_matrix)
-            # 开始对邻节点传播
-            random_list = np.random.random(size=len(adj_nodes))
-            index_list = np.where(random_list < beta)[0]
-            infected_list = adj_nodes[index_list]
-            infected_list_unique = formatInfectedList(I_list, infected_list)
-            # 加入本次所感染的节点
-            I_list.extend(infected_list_unique)
+            infected_T = []
+            for inode in I_list:
+                # 找到邻居节点集
+                adj_nodes = findAdjNode(inode, df_hyper_matrix)
+                # 开始对邻节点传播
+                random_list = np.random.random(size=len(adj_nodes))
+                index_list = np.where(random_list < beta)[0]
+                infected_list = adj_nodes[index_list]
+                infected_list_unique = formatInfectedList(I_list, infected_list, infected_T)
+                # 加入本次所感染的节点
+                infected_T.extend(infected_list_unique)
+            I_list.extend(infected_T)
             I_total_list.append(len(I_list))
         total_matrix.append(I_total_list)
 
@@ -96,4 +95,3 @@ if __name__ == '__main__':
 
     end = time.perf_counter()
     print(str(end - start))
-
